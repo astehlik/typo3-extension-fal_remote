@@ -1,0 +1,12 @@
+{
+	"name": "de-swebhosting-typo3-extension/fal-remote",
+	"description": "FAL remote adapter",
+	"type": "typo3-cms-extension",
+	"version": "0.1.0",
+	"license": "GPL-3.0+",
+	"autoload": {
+		"psr-4": {
+			"Tx\\FalRemote\\": "Classes/"
+		}
+	}
+}

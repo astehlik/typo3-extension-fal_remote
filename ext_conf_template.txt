@@ -1,0 +1,6 @@
+
+# cat=basic/server/1; type=boolean; label=Enable server: If checked the eID script for prividing server functionality is enabled.
+enableServer = 0
+
+# cat=basic/client/1; type=string; label=Remote TYPO3 URL: The URL of the TYPO3 instance where the fal_remote Extension is installed from which the files should be read.
+remoteTypo3Url =
