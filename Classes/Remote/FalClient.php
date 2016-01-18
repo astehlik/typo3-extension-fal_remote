@@ -78,15 +78,12 @@ class FalClient {
 	 */
 	public function call($storageUid, $function, $parameters = array()) {
 
-		$payload = array(
-			'storageUid' => $storageUid,
-			'function' => $function,
-			'parameters' => $parameters,
-			'hash' => GeneralUtility::hmac($storageUid . $function . serialize($parameters), 'fal_remote')
-		);
+		$parameters = base64_encode(serialize($parameters));
+		$hash = GeneralUtility::hmac($storageUid . $function . $parameters, 'fal_remote');
 
 		$report = array();
-		$url = $this->extensionConfiguration->getRemoteTypo3Url() . '?eID=fal_remote&payload=' . urlencode(json_encode($payload));
+		$url = $this->extensionConfiguration->getRemoteTypo3Url() .
+			sprintf('?eID=fal_remote&hash=%s&storageUid=%d&function=%s&parameters=%s', $hash, (int)$storageUid, rawurlencode($function), $parameters);
 		$result = GeneralUtility::getUrl($url, 0, FALSE, $report);
 
 		if (!$result) {

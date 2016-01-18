@@ -43,35 +43,44 @@ class FalServer {
 	 */
 	public function processCall() {
 
-		$payload = GeneralUtility::_GET('payload');
-		if (empty($payload)) {
-			$this->result['error'] = 'No payload submitted';
+		$storageUid = (string)GeneralUtility::_GET('storageUid');
+		if ($storageUid === '') {
+			$this->result['error'] = 'No storageUid submitted.';
+			return;
+		}
+		$storageUid = (int)$storageUid;
+
+		$function = (string)GeneralUtility::_GET('function');
+		if ($function === '') {
+			$this->result['error'] = 'No function submitted.';
 			return;
 		}
 
-		$parameters = json_decode($payload, TRUE);
-		if (!$parameters) {
-			$this->result['error'] = 'Error decoding JSON payload.';
+		$parameters = (string)GeneralUtility::_GET('parameters');
+		if ($parameters === '') {
+			$this->result['error'] = 'No parameters submnitted.';
 			return;
 		}
 
-		if (empty($parameters['hash'])) {
+		$hash = (string)GeneralUtility::_GET('hash');
+		if ($hash === '') {
 			$this->result['error'] = 'No hash was submitted.';
 			return;
 		}
 
-		if (empty($parameters['storageUid'])) {
-			$this->result['error'] = 'No storageUid was submitted.';
-			return;
-		}
-
-		if ($parameters['hash'] !== GeneralUtility::hmac($parameters['storageUid'] . $parameters['function'] . serialize($parameters['parameters']), 'fal_remote')) {
+		if ($hash !== GeneralUtility::hmac($storageUid . $function . $parameters, 'fal_remote')) {
 			$this->result['error'] = 'An invalid hash was submitted.';
 			return;
 		}
 
+		$parameters = unserialize(base64_decode($parameters));
+		if ($parameters === FALSE || !is_array($parameters)) {
+			$this->result['error'] = 'The parameters array could not be deserialized.';
+			return;
+		}
+
 		try {
-			$result = call_user_func_array(array($this->getDriver($parameters['storageUid']), $parameters['function']), $parameters['parameters']);
+			$result = call_user_func_array(array($this->getDriver($storageUid), $function), $parameters);
 
 			if ($parameters['function'] === 'getFileContents') {
 				$result = base64_encode($result);
@@ -84,7 +93,7 @@ class FalServer {
 		} catch (\Exception $e) {
 			$this->result = array(
 				'success' => FALSE,
-				'returnValue' => $e->getMessage()
+				'error' => $e->getMessage()
 			);
 		}
 
