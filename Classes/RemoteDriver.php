@@ -159,6 +159,11 @@ class RemoteDriver extends LocalDriver {
 	 * @return boolean
 	 */
 	public function fileExists($fileIdentifier) {
+		// Since we do not want to make a remote request for this check every time we
+		// only return false if the identifier ends with a slash because then it is a directory.
+		if (substr($fileIdentifier, strlen($fileIdentifier) - 1, 1) === '/') {
+			return FALSE;
+		}
 		return TRUE;
 	}
 
