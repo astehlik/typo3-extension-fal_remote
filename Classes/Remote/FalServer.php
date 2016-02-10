@@ -43,6 +43,7 @@ class FalServer {
 	 */
 	public function processCall() {
 
+
 		$storageUid = (string)GeneralUtility::_GET('storageUid');
 		if ($storageUid === '') {
 			$this->result['error'] = 'No storageUid submitted.';
@@ -82,7 +83,7 @@ class FalServer {
 		try {
 			$result = call_user_func_array(array($this->getDriver($storageUid), $function), $parameters);
 
-			if ($parameters['function'] === 'getFileContents') {
+			if ($function === 'getFileContents') {
 				$result = base64_encode($result);
 			}
 
